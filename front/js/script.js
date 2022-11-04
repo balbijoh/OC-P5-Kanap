@@ -1,13 +1,11 @@
-// Récupération des données de l'API via requête Fetch
+// Récupération des données de l'API via Fetch
 fetch('http://localhost:3000/api/products')
 .then(function(result) {
     if (result.ok) {
-        // console.log(result);
         return result.json();
     }    
 })
 .then(function(apiResult) {
-    console.log(apiResult);
     // On complète les cards de la page d'accueil
     Homepage_CreateCards(apiResult);
 })
@@ -20,7 +18,6 @@ fetch('http://localhost:3000/api/products')
 function Homepage_CreateCards(apiResult) {
     // On crée une card pour chaque produit de la liste provenant de l'API
     apiResult.forEach(kanap => {
-        console.log(kanap.name);
         const kanapItems = document.getElementById('items');
 
         // On créé les différentes balises pour chaque card : a, article, image, titre, description
@@ -45,7 +42,6 @@ function Homepage_CreateCards(apiResult) {
         kanapCard.appendChild(kanapDescription);
 
         cardLink.appendChild(kanapCard);
-        console.log(cardLink);
 
         // On ajoute chaque card à la section dédiée
         kanapItems.appendChild(cardLink);
