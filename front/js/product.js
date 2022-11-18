@@ -42,3 +42,54 @@ function Product_AddDatas(apiResult) {
         document.getElementById('colors').appendChild(colorOption);
     })
 }
+
+
+// On écoute l'événement au clic sur le bouton "Ajouter au panier"
+document.getElementById('addToCart').addEventListener('click', function() {
+    Product_SubmitChoice();
+})
+
+
+// On récupère les informations saisies par l'utilisateur (couleur, quantité) via le LocalStorage
+function Product_SubmitChoice() {
+    let myStorage = [];
+
+    // Créer un objet contenant le nouveau choix de l'utilisateur
+    let newKanap = {
+        id: kanapId,
+        color: document.getElementById('colors').value, 
+        quantity: Number(document.getElementById('quantity').value)
+    };
+
+    // Si le localStorage n'est pas vide
+    if(localStorage.length != 0) {
+        console.log("localStorage non vide");
+
+        // On stocke le contenu du localStorage dans myStorage
+        let previousChoices = JSON.parse(localStorage.getItem("kanap"));
+        previousChoices.forEach(element => {
+            myStorage.push(element);
+        })
+
+        // On cherche si l'id existe déjà dans le storage
+        let kanapIndex = myStorage.map(a => a.id).indexOf(newKanap.id);
+        console.log("kanapIndex : ", kanapIndex);
+
+        // Si l'id existe et que la couleur est la même, on incrémente la liste de la valeur souhaitée
+        if (myStorage[kanapIndex] && myStorage[kanapIndex].color == newKanap.color) {
+            console.log("même id, même couleur");
+            myStorage[kanapIndex].quantity = Number(myStorage[kanapIndex].quantity) + Number(newKanap.quantity);
+            console.log("myStorage[kanapIndex] : ", myStorage[kanapIndex]);
+        } else {
+            // Si l'id n'existe pas et/ou que la couleur n'est pas la même, on ajoute une nouvelle ligne dans le storage
+            console.log("couleur différente ou n'existe pas");
+            myStorage.push(newKanap);
+        }
+    } else {
+        myStorage.push(newKanap);
+    }
+
+    // On stocke le tableau myStorage dans le localStorage
+    localStorage.setItem("kanap", JSON.stringify(myStorage));
+    console.log(localStorage);
+}
