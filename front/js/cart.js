@@ -7,12 +7,13 @@ fetch('http://localhost:3000/api/products/')
 })
 .then(function(apiResult) {
     if (localStorage.length == 0) {
-        window.alert("Votre panier est vide. Vous allez être redirigé vers l'accueil.");
+        window.alert("Votre panier est vide. Vous allez être redirigé(e) vers l'accueil.");
         location.href="./index.html"
         return;
     }
     // Fonction permettant d'afficher les produits du panier via le localStorage
-    Cart_DatasForDOM(apiResult);    
+    Cart_DatasForDOM(apiResult);
+    Cart_UserInformations();
 })
 .catch(function(error) {
     console.log('Error (fetch request): ' + error);
@@ -129,14 +130,12 @@ function Cart_RefreshPrice(kanap, apiResult, apiIndex, inputQuantity, p2Descript
         orderPrice = apiResult[apiIndex].price * kanapQuantity;
         p2Description.innerText = (orderPrice) + '€';
 
-        // Actualisation de la quantité totale et du prix total
-        Cart_DisplayTotalInDOM();
-
         // Actualisation du localStorage
         Cart_RefreshLocalStorage(kanap, kanapQuantity);
-    })
 
-    // TODO Mettre à jour le localStorage
+        // Actualisation de la quantité totale et du prix total
+        Cart_DisplayTotalInDOM();
+    })
 }
 
 
@@ -149,12 +148,12 @@ function Cart_DeleteProduct(kanap, apiResult, apiIndex, pDelete, article) {
         kanapQuantity = 0;
         orderPrice = 0;
         article.remove();
+        
+        // Actualisation du localStorage
+        Cart_RefreshLocalStorage(kanap, kanapQuantity);
 
         // Actualisation de la quantité totale et du prix total
         Cart_DisplayTotalInDOM();
-
-        // Actualisation du localStorage
-        Cart_RefreshLocalStorage(kanap, kanapQuantity);
     })
 }
 
@@ -180,6 +179,13 @@ function Cart_DisplayTotalInDOM() {
     })
     spanTotalPrice.innerText = totalPrice;
     // --------------------------------------------------
+
+    setTimeout(function() {
+        if (localStorage.length == 0) {
+        window.alert("Votre panier est vide. Vous allez être redirigé(e) vers l'accueil.");
+        location.href="./index.html"
+        }
+    }, 500);
 }
 
 
@@ -216,5 +222,52 @@ function Cart_RefreshLocalStorage(kanap, kanapQuantity) {
 
 
 // TODO Récupérer les infos de l'utilisateur pour valider la commande
+function Cart_UserInformations() {
+    let userFirstName = document.getElementById('firstName');
+    let userLastName = document.getElementById('lastName');
+    let userAddress = document.getElementById('address');
+    let userCity = document.getElementById('city');
+    let userMail = document.getElementById('email');
+
+    // Fonctions permettant de vérifier le format de la saisie de l'utilisateur
+    Cart_RegExp(/^[a-zA-Zà-öÀ-Ö]+$/, userFirstName, 'firstNameErrorMsg', 'un prénom');
+    Cart_RegExp(/^[a-zA-Zà-öÀ-Ö]+$/, userLastName, 'lastNameErrorMsg', 'un nom de famille');
+    Cart_RegExp(/^[a-zA-Zà-öÀ-Ö0-9 '-]+$/, userAddress, 'addressErrorMsg', 'une adresse');
+    Cart_RegExp(/^[a-zA-Zà-öÀ-Ö '-]+$/, userCity, 'cityErrorMsg', 'un nom de ville');
+    Cart_RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/, userMail, 'emailErrorMsg', 'une adresse e-mail');
+    
+    // Renvoyer un objet "contact" contenant "firstName", "lastName", "address", "city" et "email"
+    let contact = {
+        firstName: userFirstName.value,
+        lastName: userLastName.value,
+        address: userAddress.value,
+        city: userCity.value,
+        email: userMail.value
+    }
+    // console.log("contact : ", contact);
+
+    // Renvoyer un tableau produits sous forme d'un array "orderId" constitué de strings product-ID
+
+    // Requête POST : http://localhost:3000/api/products/order ?
+}
+
+
+// Fonction permettant de vérifier le format de la saisie dans un champ donné
+function Cart_RegExp(regexp, element, divMsg, field) {
+    let enableBtn = 0;
+
+    element.addEventListener('keyup', function(args)  {
+        console.log(args.target.value);
+        if (regexp.test(args.target.value) == false) {
+            document.getElementById(divMsg).innerText = `Veuillez saisir ${field} valide.`;
+            document.getElementById('order').disabled = true;
+            document.getElementById('order').classList.add('order--invalid');
+        } else {
+            document.getElementById(divMsg).innerText = '';
+            document.getElementById('order').disabled = false;
+            document.getElementById('order').classList.remove('order--invalid');
+        };
+    });
+}
 
 // TODO Gestion des cas d'erreur : pas de couleur, quantité à 0
