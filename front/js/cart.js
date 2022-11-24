@@ -3,11 +3,16 @@ fetch('http://localhost:3000/api/products/')
 .then(function(result) {
     if (result.ok) {
         return result.json();
-    }    
+    }
 })
 .then(function(apiResult) {
+    if (localStorage.length == 0) {
+        window.alert("Votre panier est vide. Vous allez être redirigé vers l'accueil.");
+        location.href="./index.html"
+        return;
+    }
     // Fonction permettant d'afficher les produits du panier via le localStorage
-    Cart_DatasForDOM(apiResult);
+    Cart_DatasForDOM(apiResult);    
 })
 .catch(function(error) {
     console.log('Error (fetch request): ' + error);
@@ -16,20 +21,18 @@ fetch('http://localhost:3000/api/products/')
 
 // Fonction permettant d'utiliser les données du localStorage et de l'API
 function Cart_DatasForDOM(apiResult) {
-    // console.log('apiResult : ', apiResult);
     let products = JSON.parse(localStorage.getItem('kanap'));
     products.forEach(kanap => {
-        // console.log("kanap : ", kanap);
         // On récupère les données de l'API pour le kanap en question
         let apiIndex = apiResult.map(data => data._id).indexOf(kanap.id);
-        // console.log('resultat api : ', apiResult[apiIndex]);
 
-        Cart_DisplayProductsInDOM(kanap, apiResult, apiIndex);        
+        Cart_DisplayProductsInDOM(kanap, apiResult, apiIndex);
     });
 
     // Affichage de la quantité totale et du prix total du panier
     Cart_DisplayTotalInDOM();
 }
+
 
 // Fonction permettant de créer les éléments du DOM pour chaque ligne produit
 function Cart_DisplayProductsInDOM(kanap, apiResult, apiIndex) {
@@ -115,6 +118,7 @@ function Cart_DisplayProductsInDOM(kanap, apiResult, apiIndex) {
     Cart_DeleteProduct(kanap, apiResult, apiIndex, pDelete, article);
 }
 
+
 // Fonction permettant d'actualiser le prix de la ligne produit au "onchange"
 function Cart_RefreshPrice(kanap, apiResult, apiIndex, inputQuantity, p2Description) {
     let kanapQuantity = kanap.quantity;
@@ -127,10 +131,14 @@ function Cart_RefreshPrice(kanap, apiResult, apiIndex, inputQuantity, p2Descript
 
         // Actualisation de la quantité totale et du prix total
         Cart_DisplayTotalInDOM();
+
+        // Actualisation du localStorage
+        Cart_RefreshLocalStorage(kanap, kanapQuantity);
     })
 
     // TODO Mettre à jour le localStorage
 }
+
 
 // Fonction permettant de supprimer une ligne produit au "click"
 function Cart_DeleteProduct(kanap, apiResult, apiIndex, pDelete, article) {
@@ -138,17 +146,18 @@ function Cart_DeleteProduct(kanap, apiResult, apiIndex, pDelete, article) {
     let orderPrice = apiResult[apiIndex].price * kanapQuantity;
 
     pDelete.addEventListener("click", function(args) {
-        console.log("Delete !");
         kanapQuantity = 0;
         orderPrice = 0;
         article.remove();
 
         // Actualisation de la quantité totale et du prix total
         Cart_DisplayTotalInDOM();
-    })
 
-    // TODO Mettre à jour le localStorage
+        // Actualisation du localStorage
+        Cart_RefreshLocalStorage(kanap, kanapQuantity);
+    })
 }
+
 
 // Fonction permettant d'afficher le prix total et la quantité totale du panier
 function Cart_DisplayTotalInDOM() {
@@ -159,7 +168,6 @@ function Cart_DisplayTotalInDOM() {
         let articleQuantity = input.value;
         totalQuantity += parseInt(articleQuantity);
     })
-    // console.log("totalQuantity : ", totalQuantity);
     spanTotalQuantity.innerText = totalQuantity;
     // --------------------------------------------------
 
@@ -170,37 +178,43 @@ function Cart_DisplayTotalInDOM() {
         let articlePrice = article.querySelector('.cart__item__content__description p ~ p').innerHTML;
         totalPrice += parseFloat(articlePrice);
     })
-    // console.log(totalPrice);
     spanTotalPrice.innerText = totalPrice;
     // --------------------------------------------------
 }
 
-// TODO Rediriger vers la page d'accueil si panier vide
-function Cart_Redirect() {
-    // Si localStorage vide, alors on redirige vers l'accueil
+
+// Fonction permettant de gérer le localStorage
+function Cart_RefreshLocalStorage(kanap, kanapQuantity) {
+    let myStorage = [];
+    let kanapId = kanap.id;
+
+    // On stocke le contenu du localStorage dans myStorage
+    let previousChoices = JSON.parse(localStorage.getItem("kanap"));
+    previousChoices.forEach(element => {
+        myStorage.push(element);
+    })
+
+    // On récupère l'index du kanap dans myStorage
+    let storageKanapIndex = myStorage.findIndex(function (item) {
+        return item.id === kanap.id;
+    });
+
+    // Si la quantité est > 0, on la modifie dans myStorage ; sinon, on enlève le kanap de myStorage
+    if (kanapQuantity != 0) {
+        myStorage[storageKanapIndex].quantity = kanapQuantity;
+    } else {
+        myStorage.splice(storageKanapIndex, 1);
+    }
+
+    // Si myStorage est vide, on clear le localStorage ; sinon on stocke myStorage dans le localStorage
+    if (myStorage.length == 0) {
+        localStorage.clear();
+    } else {
+        localStorage.setItem("kanap", JSON.stringify(myStorage));
+    }
 }
+
 
 // TODO Récupérer les infos de l'utilisateur pour valider la commande
 
-// Fonction permettant de gérer le localStorage
-function Cart_RefreshLocalStorage() {
-    let myStorage = [];
-
-    // Si le localStorage n'est pas vide
-    if(localStorage.length != 0) {
-        console.log("localStorage non vide");
-
-        // On stocke le contenu du localStorage dans myStorage
-        let previousChoices = JSON.parse(localStorage.getItem("kanap"));
-        previousChoices.forEach(element => {
-            myStorage.push(element);
-        })
-
-    } else {
-        // localStorage vide -> rediriger vers l'accueil
-    }
-
-    // On stocke le tableau myStorage dans le localStorage
-    localStorage.setItem("kanap", JSON.stringify(myStorage));
-    console.log(localStorage);
-}
+// TODO Gestion des cas d'erreur : pas de couleur, quantité à 0
