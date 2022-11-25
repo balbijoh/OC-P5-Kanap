@@ -294,7 +294,7 @@ function Cart_FetchRequestPOST(paramsRequest) {
         }
     }).then(function(postResult) {
         let orderId = postResult.orderId;
-        location.href = window.location.href.split("/cart.html")[0] + `/confirmation.html?orderId=${orderId}`;
+        location.href = window.location.href.split('/cart.html')[0] + `/confirmation.html?orderId=${orderId}`;
     }).catch(function(error) {
         console.log('Error (fetch request POST): ' + error);
     })
