@@ -69,6 +69,12 @@
 	text-align: center;
 	text-align-last: center;
 }
+
+.item__content__settings__color .input--invalid,
+.item__content__settings__quantity .input--invalid {
+	border: 1px solid #e46767;
+}
+
 .item__content__settings__color select:focus,
 .item__content__settings__quantity input:focus {
 	outline: none;
@@ -90,8 +96,13 @@
 .item__content__addButton button:hover {
 	box-shadow: rgba(42, 18, 206, 0.9) 0 0 22px 6px;
 }
-
-
+.item__content__addButton .add-btn--invalid {
+	background-color: lightgrey;
+	cursor: not-allowed;
+}
+.item__content__addButton .add-btn--invalid:hover {
+	box-shadow: none;
+}
 
 
 

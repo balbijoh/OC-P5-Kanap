@@ -3,14 +3,17 @@ let currentUrl = window.location.href;
 let url = new URL(currentUrl);
 let kanapId = url.searchParams.get('id');
 
-// TODO Gérer les cas d'erreur : redirection si page non existante, si le canapé n'existe pas
 
 // Récupération des données de l'API via Fetch
 fetch('http://localhost:3000/api/products/' + kanapId)
 .then(function(result) {
     if (result.ok) {
         return result.json();
-    }    
+    } else {
+        window.alert("La page demandée n'existe pas ou n'existe plus. Vous allez être redirigé(e) vers l'accueil.");
+        location.href = "./index.html";
+        return;
+    }
 })
 .then(function(apiResult) {
     Product_AddDatas(apiResult);
@@ -45,13 +48,7 @@ function Product_AddDatas(apiResult) {
 }
 
 
-// On écoute l'événement au clic sur le bouton "Ajouter au panier"
-document.getElementById('addToCart').addEventListener('click', function() {
-    Product_SubmitChoice();
-})
-
-
-// On récupère les informations saisies par l'utilisateur (couleur, quantité) via le LocalStorage
+// Fonction qui récupère les informations saisies par l'utilisateur (couleur, quantité) via le LocalStorage
 function Product_SubmitChoice() {
     let myStorage = [];
 
@@ -89,4 +86,63 @@ function Product_SubmitChoice() {
 }
 
 
-// TODO Gérer cas d'erreur : bouton disabled si champs non renseignés
+// Fonction permettant de vérifier les champs couleur/quantité avant l'ajout au panier
+function Product_CheckInputsValues() {
+    let addBtn = document.getElementById('addToCart');
+    addBtn.disabled = true;
+    addBtn.classList.add('add-btn--invalid');
+
+    let colorField = document.getElementById('colors');
+    let colorSelect = document.querySelector('.item__content__settings__color select');
+    let quantityField = document.getElementById('quantity');
+    let quantityInput = document.querySelector('.item__content__settings__quantity input');
+
+    colorField.addEventListener('change', function(event) {
+        if (colorField.value == '' || colorField.value == null) {
+            console.log('Veuillez choisir une couleur');
+            colorSelect.classList.add('input--invalid');
+            addBtn.disabled = true;
+            addBtn.classList.add('add-btn--invalid');
+        } else if (colorField.value != '' && quantityField.value <= 0) {
+            console.log('Veuillez saisir une quantité valide');
+            quantityInput.classList.add('input--invalid');
+            colorSelect.classList.remove('input--invalid');
+            addBtn.disabled = true;
+            addBtn.classList.add('add-btn--invalid');
+        } else {
+            colorSelect.classList.remove('input--invalid');
+            quantityInput.classList.remove('input--invalid');
+            addBtn.disabled = false;
+            addBtn.classList.remove('add-btn--invalid');
+        }
+    });
+
+    quantityField.addEventListener('change', function(event) {
+        if (quantityField.value <= 0 || quantityField.value == null) {
+            console.log('Veuillez saisir une quantité valide');
+            quantityInput.classList.add('input--invalid');
+            addBtn.disabled = true;
+            addBtn.classList.add('add-btn--invalid');
+        } else if (quantityField.value > 0 && colorField.value == '') {
+            console.log('Veuillez choisir une couleur');
+            colorSelect.classList.add('input--invalid');
+            quantityInput.classList.remove('input--invalid');
+            addBtn.disabled = true;
+            addBtn.classList.add('add-btn--invalid');
+        } else {
+            colorSelect.classList.remove('input--invalid');
+            quantityInput.classList.remove('input--invalid');
+            addBtn.disabled = false;
+            addBtn.classList.remove('add-btn--invalid');
+        }
+    });
+}
+
+Product_CheckInputsValues();
+
+// On écoute l'événement au clic sur le bouton "Ajouter au panier"
+document.getElementById('addToCart').addEventListener('click', function(event) {
+    Product_SubmitChoice();
+})
+
+// TODO Toast pour indiquer que le produit a bien été ajouté au panier ?
