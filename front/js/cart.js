@@ -4,19 +4,17 @@ fetch('http://localhost:3000/api/products/')
     if (result.ok) {
         return result.json();
     }
-})
-.then(function(apiResult) {
+}).then(function(apiResult) {
     if (localStorage.length == 0) {
         window.alert("Votre panier est vide. Vous allez être redirigé(e) vers l'accueil.");
-        location.href="./index.html"
+        location.href = "./index.html";
         return;
     }
     // Fonction permettant d'afficher les produits du panier via le localStorage
     Cart_DatasForDOM(apiResult);
     Cart_UserInformations();
-})
-.catch(function(error) {
-    console.log('Error (fetch request): ' + error);
+}).catch(function(error) {
+    console.log('Error (fetch request GET): ' + error);
 })
 
 
@@ -182,8 +180,8 @@ function Cart_DisplayTotalInDOM() {
 
     setTimeout(function() {
         if (localStorage.length == 0) {
-        window.alert("Votre panier est vide. Vous allez être redirigé(e) vers l'accueil.");
-        location.href="./index.html"
+            window.alert("Votre panier est vide. Vous allez être redirigé(e) vers la page d'accueil.");
+            location.href = "./index.html";
         }
     }, 500);
 }
@@ -235,29 +233,39 @@ function Cart_UserInformations() {
     Cart_RegExp(/^[a-zA-Zà-öÀ-Ö0-9 '-]+$/, userAddress, 'addressErrorMsg', 'une adresse');
     Cart_RegExp(/^[a-zA-Zà-öÀ-Ö '-]+$/, userCity, 'cityErrorMsg', 'un nom de ville');
     Cart_RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/, userMail, 'emailErrorMsg', 'une adresse e-mail');
-    
-    // Renvoyer un objet "contact" contenant "firstName", "lastName", "address", "city" et "email"
-    let contact = {
-        firstName: userFirstName.value,
-        lastName: userLastName.value,
-        address: userAddress.value,
-        city: userCity.value,
-        email: userMail.value
-    }
-    // console.log("contact : ", contact);
 
-    // Renvoyer un tableau produits sous forme d'un array "orderId" constitué de strings product-ID
+    // Au clic du bouton "Commander", on exécute la requête POST
+    document.getElementById('order').addEventListener('click', function(event) {
+        event.preventDefault();
 
-    // Requête POST : http://localhost:3000/api/products/order ?
+        // On complète les paramètres pour effectuer la requête POST
+        let contact = {
+            firstName: userFirstName.value,
+            lastName: userLastName.value,
+            address: userAddress.value,
+            city: userCity.value,
+            email: userMail.value
+        }
+
+        let myStorage = JSON.parse(localStorage.getItem("kanap"));
+        let productsId = [];
+        myStorage.forEach(kanap => {
+            productsId.push(kanap.id);
+        })
+
+        let paramsRequest = {
+            contact: contact,
+            products: productsId
+        }
+
+        Cart_FetchRequestPOST(paramsRequest);
+    })
 }
 
 
 // Fonction permettant de vérifier le format de la saisie dans un champ donné
 function Cart_RegExp(regexp, element, divMsg, field) {
-    let enableBtn = 0;
-
     element.addEventListener('keyup', function(args)  {
-        console.log(args.target.value);
         if (regexp.test(args.target.value) == false) {
             document.getElementById(divMsg).innerText = `Veuillez saisir ${field} valide.`;
             document.getElementById('order').disabled = true;
@@ -270,4 +278,26 @@ function Cart_RegExp(regexp, element, divMsg, field) {
     });
 }
 
-// TODO Gestion des cas d'erreur : pas de couleur, quantité à 0
+
+// Requête POST permettant de soumettre les données de commandes et obtenir un numéro de commande
+function Cart_FetchRequestPOST(paramsRequest) {
+    console.log("requête POST");
+    fetch('http://localhost:3000/api/products/order', {
+        method: 'POST',
+        headers: {
+            'Content-type': 'application/json; charset=UTF-8'
+        },
+        body: JSON.stringify(paramsRequest),
+    }).then(function(result) {
+        if (result.ok) {
+            return result.json();
+        }
+    }).then(function(postResult) {
+        let orderId = postResult.orderId;
+        location.href = window.location.href.split("/cart.html")[0] + `/confirmation.html?orderId=${orderId}`;
+    }).catch(function(error) {
+        console.log('Error (fetch request POST): ' + error);
+    })
+}
+
+// TODO Gestion des cas d'erreur : quantité à 0

@@ -4,6 +4,7 @@ let url = new URL(currentUrl);
 let kanapId = url.searchParams.get('id');
 
 // TODO Gérer les cas d'erreur : redirection si page non existante, si le canapé n'existe pas
+
 // Récupération des données de l'API via Fetch
 fetch('http://localhost:3000/api/products/' + kanapId)
 .then(function(result) {
