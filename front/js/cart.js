@@ -219,7 +219,7 @@ function Cart_RefreshLocalStorage(kanap, kanapQuantity) {
 }
 
 
-// TODO Récupérer les infos de l'utilisateur pour valider la commande
+// Récupérer les infos de l'utilisateur pour valider la commande
 function Cart_UserInformations() {
     let userFirstName = document.getElementById('firstName');
     let userLastName = document.getElementById('lastName');
@@ -281,7 +281,6 @@ function Cart_RegExp(regexp, element, divMsg, field) {
 
 // Requête POST permettant de soumettre les données de commandes et obtenir un numéro de commande
 function Cart_FetchRequestPOST(paramsRequest) {
-    console.log("requête POST");
     fetch('http://localhost:3000/api/products/order', {
         method: 'POST',
         headers: {

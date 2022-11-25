@@ -2,7 +2,6 @@
 let currentUrl = window.location.href;
 let url = new URL(currentUrl);
 let orderId = url.searchParams.get('orderId');
-console.log("orderId : ", orderId);
 
 Confirmation_DisplayDatasInDOM(orderId);
 
@@ -14,5 +13,4 @@ function Confirmation_DisplayDatasInDOM(orderId) {
     // ---------------------------------------------------
 
     localStorage.clear();
-    console.log(localStorage);
 }
