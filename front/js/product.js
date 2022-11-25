@@ -99,12 +99,10 @@ function Product_CheckInputsValues() {
 
     colorField.addEventListener('change', function(event) {
         if (colorField.value == '' || colorField.value == null) {
-            console.log('Veuillez choisir une couleur');
             colorSelect.classList.add('input--invalid');
             addBtn.disabled = true;
             addBtn.classList.add('add-btn--invalid');
         } else if (colorField.value != '' && quantityField.value <= 0) {
-            console.log('Veuillez saisir une quantité valide');
             quantityInput.classList.add('input--invalid');
             colorSelect.classList.remove('input--invalid');
             addBtn.disabled = true;
@@ -119,12 +117,10 @@ function Product_CheckInputsValues() {
 
     quantityField.addEventListener('change', function(event) {
         if (quantityField.value <= 0 || quantityField.value == null) {
-            console.log('Veuillez saisir une quantité valide');
             quantityInput.classList.add('input--invalid');
             addBtn.disabled = true;
             addBtn.classList.add('add-btn--invalid');
         } else if (quantityField.value > 0 && colorField.value == '') {
-            console.log('Veuillez choisir une couleur');
             colorSelect.classList.add('input--invalid');
             quantityInput.classList.remove('input--invalid');
             addBtn.disabled = true;

@@ -228,8 +228,8 @@ function Cart_UserInformations() {
     let userMail = document.getElementById('email');
 
     // Fonctions permettant de vérifier le format de la saisie de l'utilisateur
-    Cart_RegExp(/^[a-zA-Zà-öÀ-Ö]+$/, userFirstName, 'firstNameErrorMsg', 'un prénom');
-    Cart_RegExp(/^[a-zA-Zà-öÀ-Ö]+$/, userLastName, 'lastNameErrorMsg', 'un nom de famille');
+    Cart_RegExp(/^[a-zA-Zà-öÀ-Ö -]+$/, userFirstName, 'firstNameErrorMsg', 'un prénom');
+    Cart_RegExp(/^[a-zA-Zà-öÀ-Ö '-]+$/, userLastName, 'lastNameErrorMsg', 'un nom de famille');
     Cart_RegExp(/^[a-zA-Zà-öÀ-Ö0-9 '-]+$/, userAddress, 'addressErrorMsg', 'une adresse');
     Cart_RegExp(/^[a-zA-Zà-öÀ-Ö '-]+$/, userCity, 'cityErrorMsg', 'un nom de ville');
     Cart_RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/, userMail, 'emailErrorMsg', 'une adresse e-mail');
