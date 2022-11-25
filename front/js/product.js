@@ -3,6 +3,7 @@ let currentUrl = window.location.href;
 let url = new URL(currentUrl);
 let kanapId = url.searchParams.get('id');
 
+// TODO Gérer les cas d'erreur : redirection si page non existante, si le canapé n'existe pas
 
 // Récupération des données de l'API via Fetch
 fetch('http://localhost:3000/api/products/' + kanapId)
@@ -93,3 +94,6 @@ function Product_SubmitChoice() {
     localStorage.setItem("kanap", JSON.stringify(myStorage));
     console.log(localStorage);
 }
+
+
+// TODO Gérer cas d'erreur : bouton disabled si champs non renseignés
