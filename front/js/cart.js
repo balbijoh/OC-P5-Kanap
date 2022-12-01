@@ -86,7 +86,7 @@ function Cart_DisplayProductsInDOM(kanap, apiResult, apiIndex) {
         name: 'itemQuantity',
         min: '1',
         max: '100',
-        value: kanap.quantity
+        value: kanap.quantity,
     });
 
     const pQuantity = document.createElement('p');
@@ -113,17 +113,24 @@ function Cart_DisplayProductsInDOM(kanap, apiResult, apiIndex) {
     document.getElementById('cart__items').appendChild(article);
 
     // Fonctions permettant de mettre à jour les données du panier (modification, suppression de ligne produit)
-    Cart_RefreshPrice(kanap, apiResult, apiIndex, inputQuantity, p2Description);
+    Cart_RefreshPrice(kanap, apiResult, apiIndex, inputQuantity, p2Description, article);
     Cart_DeleteProduct(kanap, apiResult, apiIndex, pDelete, article);
 }
 
 
 // Fonction permettant d'actualiser le prix de la ligne produit au "onchange"
-function Cart_RefreshPrice(kanap, apiResult, apiIndex, inputQuantity, p2Description) {
+function Cart_RefreshPrice(kanap, apiResult, apiIndex, inputQuantity, p2Description, article) {
     let kanapQuantity = kanap.quantity;
     let orderPrice = apiResult[apiIndex].price * kanapQuantity;
 
-    inputQuantity.addEventListener("change", function(args) {
+    inputQuantity.addEventListener('change', function(args) {
+        if (inputQuantity.value <= 0) {
+            inputQuantity.value = null;
+            document.getElementById('cart__items').removeChild(article);
+        }
+        if (inputQuantity.value > 100) {
+            inputQuantity.value = 100;
+        }
         kanapQuantity = args.target.value;
         orderPrice = apiResult[apiIndex].price * kanapQuantity;
         p2Description.innerText = (orderPrice) + '€';
@@ -132,7 +139,7 @@ function Cart_RefreshPrice(kanap, apiResult, apiIndex, inputQuantity, p2Descript
         Cart_RefreshLocalStorage(kanap, kanapQuantity);
 
         // Actualisation de la quantité totale et du prix total
-        Cart_DisplayTotalInDOM();
+        Cart_DisplayTotalInDOM();        
     })
 }
 
@@ -228,10 +235,10 @@ function Cart_UserInformations() {
     let userMail = document.getElementById('email');
 
     // Fonctions permettant de vérifier le format de la saisie de l'utilisateur
-    Cart_RegExp(/^[a-zA-Zà-öÀ-Ö -]+$/, userFirstName, 'firstNameErrorMsg', 'un prénom');
-    Cart_RegExp(/^[a-zA-Zà-öÀ-Ö '-]+$/, userLastName, 'lastNameErrorMsg', 'un nom de famille');
-    Cart_RegExp(/^[a-zA-Zà-öÀ-Ö0-9 '-]+$/, userAddress, 'addressErrorMsg', 'une adresse');
-    Cart_RegExp(/^[a-zA-Zà-öÀ-Ö '-]+$/, userCity, 'cityErrorMsg', 'un nom de ville');
+    Cart_RegExp(/^[a-zA-Zà-öÀ-Ö -]{3,60}$/, userFirstName, 'firstNameErrorMsg', 'un prénom');
+    Cart_RegExp(/^[a-zA-Zà-öÀ-Ö '-]{2,100}$/, userLastName, 'lastNameErrorMsg', 'un nom de famille');
+    Cart_RegExp(/^[a-zA-Zà-öÀ-Ö0-9 '-]{0,150}$/, userAddress, 'addressErrorMsg', 'une adresse');
+    Cart_RegExp(/^[a-zA-Zà-öÀ-Ö '-]{2,100}$/, userCity, 'cityErrorMsg', 'un nom de ville');
     Cart_RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/, userMail, 'emailErrorMsg', 'une adresse e-mail');
 
     // Au clic du bouton "Commander", on exécute la requête POST
