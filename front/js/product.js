@@ -102,7 +102,7 @@ function Product_CheckInputsValues() {
             colorSelect.classList.add('input--invalid');
             addBtn.disabled = true;
             addBtn.classList.add('add-btn--invalid');
-        } else if (colorField.value != '' && quantityField.value <= 0) {
+        } else if (colorField.value != '' && quantityField.value <= 0 || quantityField.value > 100) {
             quantityInput.classList.add('input--invalid');
             colorSelect.classList.remove('input--invalid');
             addBtn.disabled = true;
@@ -116,7 +116,7 @@ function Product_CheckInputsValues() {
     });
 
     quantityField.addEventListener('change', function(event) {
-        if (quantityField.value <= 0 || quantityField.value == null) {
+        if (quantityField.value <= 0 || quantityField.value > 100 || quantityField.value == null) {
             quantityInput.classList.add('input--invalid');
             addBtn.disabled = true;
             addBtn.classList.add('add-btn--invalid');
@@ -139,6 +139,25 @@ Product_CheckInputsValues();
 // On écoute l'événement au clic sur le bouton "Ajouter au panier"
 document.getElementById('addToCart').addEventListener('click', function(event) {
     Product_SubmitChoice();
+    Product_ToastAddToCart();
 })
 
-// TODO Toast pour indiquer que le produit a bien été ajouté au panier ?
+
+// Toast pour indiquer que le produit a bien été ajouté au panier
+function Product_ToastAddToCart() {
+    let toastDiv = document.createElement('div');
+    toastDiv.classList.add('toast');
+    let toastText = document.createElement('p');
+    toastText.classList.add('toast-text');
+    toastText.innerText = 'Produit ajouté au panier';
+    let toastCloseBtn = document.createElement('button');
+    toastCloseBtn.classList.add('toast-button');
+    toastCloseBtn.innerText = 'X';
+
+    toastDiv.append(toastText, toastCloseBtn);
+    document.querySelector('.limitedWidthBlock').appendChild(toastDiv);
+
+    toastDiv.addEventListener('click', function(event) {
+        document.querySelector('.limitedWidthBlock').removeChild(toastDiv);
+    })
+}
