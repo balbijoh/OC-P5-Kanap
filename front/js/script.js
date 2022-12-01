@@ -6,7 +6,7 @@ fetch('http://localhost:3000/api/products')
     }    
 })
 .then(function(apiResult) {
-    // On complète les cards de la page d'accueil
+    // On crée les cartes produits de la page d'accueil
     Homepage_CreateCards(apiResult);
 })
 .catch(function(error) {
@@ -21,29 +21,26 @@ function Homepage_CreateCards(apiResult) {
         const kanapItems = document.getElementById('items');
 
         // On créé les différentes balises pour chaque card : a, article, image, titre, description
-        let cardLink = document.createElement('a');
+        const cardLink = document.createElement('a');
         cardLink.setAttribute('href', window.location.href.replace('/index.html', `/product.html?id=${kanap._id}`));
 
-        let kanapCard = document.createElement('article');
+        const kanapCard = document.createElement('article');
 
-        let kanapImg = document.createElement('img');
+        const kanapImg = document.createElement('img');
         kanapImg.setAttribute('src', kanap.imageUrl);
         kanapImg.setAttribute('alt', kanap.altTxt);
-        kanapCard.appendChild(kanapImg);
 
-        let kanapTitle = document.createElement('h3');
+        const kanapTitle = document.createElement('h3');
         kanapTitle.textContent = kanap.name;
         kanapTitle.setAttribute('class', 'productName');
-        kanapCard.appendChild(kanapTitle);
 
-        let kanapDescription = document.createElement('p');
+        const kanapDescription = document.createElement('p');
         kanapDescription.textContent = kanap.description;
         kanapDescription.setAttribute('class', 'productDescription');
-        kanapCard.appendChild(kanapDescription);
 
+        // On injecte les balises créées dans le DOM
+        kanapCard.append(kanapImg, kanapTitle, kanapDescription);
         cardLink.appendChild(kanapCard);
-
-        // On ajoute chaque card à la section dédiée
         kanapItems.appendChild(cardLink);
     });
 }

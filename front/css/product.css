@@ -101,6 +101,8 @@
 .item__content__addButton .add-btn--invalid:hover {
 	box-shadow: none;
 }
+
+/*Toast*/
 .limitedWidthBlock .toast {
     display: flex;
 	border-radius: 10px;

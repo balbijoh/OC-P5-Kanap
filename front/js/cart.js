@@ -10,8 +10,10 @@ fetch('http://localhost:3000/api/products/')
         location.href = "./index.html";
         return;
     }
-    // Fonction permettant d'afficher les produits du panier via le localStorage
+    // On affiche les produits du panier via le localStorage
     Cart_DatasForDOM(apiResult);
+
+    // On récupère les données saisies dans le formulaire de commande
     Cart_UserInformations();
 
     // Bouton de commande désactivé à l'initialisation de la page
@@ -21,6 +23,8 @@ fetch('http://localhost:3000/api/products/')
     console.log('Error (fetch request GET): ' + error);
 })
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// FONCTIONS LIEES A L'AFFICHAGE DES LIGNES PRODUIT ////////////////////////////////////////////////
 
 // Fonction permettant d'utiliser les données du localStorage et de l'API
 function Cart_DatasForDOM(apiResult) {
@@ -35,7 +39,6 @@ function Cart_DatasForDOM(apiResult) {
     // Affichage de la quantité totale et du prix total du panier
     Cart_DisplayTotalInDOM();
 }
-
 
 // Fonction permettant de créer les éléments du DOM pour chaque ligne produit
 function Cart_DisplayProductsInDOM(kanap, apiResult, apiIndex) {
@@ -121,7 +124,6 @@ function Cart_DisplayProductsInDOM(kanap, apiResult, apiIndex) {
     Cart_DeleteProduct(kanap, apiResult, apiIndex, pDelete, article);
 }
 
-
 // Fonction permettant d'actualiser le prix de la ligne produit au "onchange"
 function Cart_RefreshPrice(kanap, apiResult, apiIndex, inputQuantity, p2Description, article) {
     let kanapQuantity = kanap.quantity;
@@ -147,7 +149,6 @@ function Cart_RefreshPrice(kanap, apiResult, apiIndex, inputQuantity, p2Descript
     })
 }
 
-
 // Fonction permettant de supprimer une ligne produit au "click"
 function Cart_DeleteProduct(kanap, apiResult, apiIndex, pDelete, article) {
     let kanapQuantity = kanap.quantity;
@@ -165,7 +166,6 @@ function Cart_DeleteProduct(kanap, apiResult, apiIndex, pDelete, article) {
         Cart_DisplayTotalInDOM();
     })
 }
-
 
 // Fonction permettant d'afficher le prix total et la quantité totale du panier
 function Cart_DisplayTotalInDOM() {
@@ -196,7 +196,6 @@ function Cart_DisplayTotalInDOM() {
         }
     }, 500);
 }
-
 
 // Fonction permettant de gérer le localStorage
 function Cart_RefreshLocalStorage(kanap, kanapQuantity) {
@@ -229,13 +228,17 @@ function Cart_RefreshLocalStorage(kanap, kanapQuantity) {
 }
 
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// FONCTIONS LIEES AU FORMULAIRE DE COMMANDE ///////////////////////////////////////////////////////
+
 // Récupérer les infos de l'utilisateur pour valider la commande
 function Cart_UserInformations() {
-    let userFirstName = document.getElementById('firstName');
-    let userLastName = document.getElementById('lastName');
-    let userAddress = document.getElementById('address');
-    let userCity = document.getElementById('city');
-    let userMail = document.getElementById('email');
+    const userFirstName = document.getElementById('firstName');
+    const userLastName = document.getElementById('lastName');
+    const userAddress = document.getElementById('address');
+    const userCity = document.getElementById('city');
+    const userMail = document.getElementById('email');
 
     // Fonctions permettant de vérifier le format de la saisie de l'utilisateur
     Cart_RegExp(/^[a-zA-Zà-öÀ-Ö -]{3,60}$/, userFirstName, 'firstNameErrorMsg', 'un prénom');
@@ -273,7 +276,6 @@ function Cart_UserInformations() {
     })
 }
 
-
 // Fonction permettant de vérifier le format de la saisie dans un champ donné
 function Cart_RegExp(regexp, element, divMsg, field) {
     element.addEventListener('keyup', function(args)  {
@@ -286,7 +288,6 @@ function Cart_RegExp(regexp, element, divMsg, field) {
         Cart_EnableOrderBtn();
     });
 }
-
 
 // Fonction permettant d'activer le bouton de commande si les champs sont valides
 function Cart_EnableOrderBtn() {
@@ -303,7 +304,6 @@ function Cart_EnableOrderBtn() {
     }
 }
 
-
 // Requête POST permettant de soumettre les données de commandes et obtenir un numéro de commande
 function Cart_FetchRequestPOST(paramsRequest) {
     fetch('http://localhost:3000/api/products/order', {
@@ -317,7 +317,7 @@ function Cart_FetchRequestPOST(paramsRequest) {
             return result.json();
         }
     }).then(function(postResult) {
-        let orderId = postResult.orderId;
+        const orderId = postResult.orderId;
         location.href = window.location.href.split('/cart.html')[0] + `/confirmation.html?orderId=${orderId}`;
     }).catch(function(error) {
         console.log('Error (fetch request POST): ' + error);

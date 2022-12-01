@@ -1,7 +1,7 @@
 // Récupération de l'ID du canapé figurant sur la page produit
-let currentUrl = window.location.href;
-let url = new URL(currentUrl);
-let kanapId = url.searchParams.get('id');
+const currentUrl = window.location.href;
+const url = new URL(currentUrl);
+const kanapId = url.searchParams.get('id');
 
 
 // Récupération des données de l'API via Fetch
@@ -16,7 +16,21 @@ fetch('http://localhost:3000/api/products/' + kanapId)
     }
 })
 .then(function(apiResult) {
+    // On désactive le bouton d'ajout au panier à l'initialisation de la page
+    document.getElementById('addToCart').disabled = true;
+    document.getElementById('addToCart').classList.add('add-btn--invalid');
+
+    // On injecte les données dynamiques dans le DOM
     Product_AddDatas(apiResult);
+    
+    // On vérifie la saisie quantité/couleur ("onchange")
+    Product_CheckInputsValues();
+
+    // On stock les choix utilisateur dans le localStorage ("onclick")
+    document.getElementById('addToCart').addEventListener('click', function(event) {
+        Product_SubmitChoice();
+        Product_ToastAddToCart();
+    })
 })
 .catch(function(error) {
     console.log('Error (fetch request): ' + error);
@@ -29,7 +43,7 @@ function Product_AddDatas(apiResult) {
     document.querySelector('title').textContent = apiResult.name;
 
     // On complète la description du produit
-    let kanapImg = document.createElement('img');
+    const kanapImg = document.createElement('img');
     kanapImg.setAttribute('src', apiResult.imageUrl);
     kanapImg.setAttribute('alt', apiResult.altTxt);
     document.querySelector('.item__img').appendChild(kanapImg);
@@ -40,11 +54,57 @@ function Product_AddDatas(apiResult) {
 
     // On injecte les différents choix de couleurs dans la liste déroulante
     apiResult.colors.forEach(color => {
-        let colorOption = document.createElement('option');
+        const colorOption = document.createElement('option');
         colorOption.setAttribute('value', color);
         colorOption.textContent = color;
         document.getElementById('colors').appendChild(colorOption);
     })
+}
+
+
+// Fonction permettant de vérifier les champs couleur/quantité avant l'ajout au panier
+function Product_CheckInputsValues() {
+    const addBtn = document.getElementById('addToCart');
+    const colorField = document.getElementById('colors');
+    const colorSelect = document.querySelector('.item__content__settings__color select');
+    const quantityField = document.getElementById('quantity');
+    const quantityInput = document.querySelector('.item__content__settings__quantity input');
+
+    colorField.addEventListener('change', function(event) {
+        if (colorField.value == '' || colorField.value == null) {
+            colorSelect.classList.add('input--invalid');
+            addBtn.disabled = true;
+            addBtn.classList.add('add-btn--invalid');
+        } else if (colorField.value != '' && quantityField.value <= 0 || quantityField.value > 100) {
+            quantityInput.classList.add('input--invalid');
+            colorSelect.classList.remove('input--invalid');
+            addBtn.disabled = true;
+            addBtn.classList.add('add-btn--invalid');
+        } else {
+            colorSelect.classList.remove('input--invalid');
+            quantityInput.classList.remove('input--invalid');
+            addBtn.disabled = false;
+            addBtn.classList.remove('add-btn--invalid');
+        }
+    });
+
+    quantityField.addEventListener('change', function(event) {
+        if (quantityField.value <= 0 || quantityField.value > 100 || quantityField.value == null) {
+            quantityInput.classList.add('input--invalid');
+            addBtn.disabled = true;
+            addBtn.classList.add('add-btn--invalid');
+        } else if (quantityField.value > 0 && colorField.value == '') {
+            colorSelect.classList.add('input--invalid');
+            quantityInput.classList.remove('input--invalid');
+            addBtn.disabled = true;
+            addBtn.classList.add('add-btn--invalid');
+        } else {
+            colorSelect.classList.remove('input--invalid');
+            quantityInput.classList.remove('input--invalid');
+            addBtn.disabled = false;
+            addBtn.classList.remove('add-btn--invalid');
+        }
+    });
 }
 
 
@@ -86,71 +146,14 @@ function Product_SubmitChoice() {
 }
 
 
-// Fonction permettant de vérifier les champs couleur/quantité avant l'ajout au panier
-function Product_CheckInputsValues() {
-    let addBtn = document.getElementById('addToCart');
-    addBtn.disabled = true;
-    addBtn.classList.add('add-btn--invalid');
-
-    let colorField = document.getElementById('colors');
-    let colorSelect = document.querySelector('.item__content__settings__color select');
-    let quantityField = document.getElementById('quantity');
-    let quantityInput = document.querySelector('.item__content__settings__quantity input');
-
-    colorField.addEventListener('change', function(event) {
-        if (colorField.value == '' || colorField.value == null) {
-            colorSelect.classList.add('input--invalid');
-            addBtn.disabled = true;
-            addBtn.classList.add('add-btn--invalid');
-        } else if (colorField.value != '' && quantityField.value <= 0 || quantityField.value > 100) {
-            quantityInput.classList.add('input--invalid');
-            colorSelect.classList.remove('input--invalid');
-            addBtn.disabled = true;
-            addBtn.classList.add('add-btn--invalid');
-        } else {
-            colorSelect.classList.remove('input--invalid');
-            quantityInput.classList.remove('input--invalid');
-            addBtn.disabled = false;
-            addBtn.classList.remove('add-btn--invalid');
-        }
-    });
-
-    quantityField.addEventListener('change', function(event) {
-        if (quantityField.value <= 0 || quantityField.value > 100 || quantityField.value == null) {
-            quantityInput.classList.add('input--invalid');
-            addBtn.disabled = true;
-            addBtn.classList.add('add-btn--invalid');
-        } else if (quantityField.value > 0 && colorField.value == '') {
-            colorSelect.classList.add('input--invalid');
-            quantityInput.classList.remove('input--invalid');
-            addBtn.disabled = true;
-            addBtn.classList.add('add-btn--invalid');
-        } else {
-            colorSelect.classList.remove('input--invalid');
-            quantityInput.classList.remove('input--invalid');
-            addBtn.disabled = false;
-            addBtn.classList.remove('add-btn--invalid');
-        }
-    });
-}
-
-Product_CheckInputsValues();
-
-// On écoute l'événement au clic sur le bouton "Ajouter au panier"
-document.getElementById('addToCart').addEventListener('click', function(event) {
-    Product_SubmitChoice();
-    Product_ToastAddToCart();
-})
-
-
 // Toast pour indiquer que le produit a bien été ajouté au panier
 function Product_ToastAddToCart() {
-    let toastDiv = document.createElement('div');
+    const toastDiv = document.createElement('div');
     toastDiv.classList.add('toast');
-    let toastText = document.createElement('p');
+    const toastText = document.createElement('p');
     toastText.classList.add('toast-text');
     toastText.innerText = 'Produit ajouté au panier';
-    let toastCloseBtn = document.createElement('button');
+    const toastCloseBtn = document.createElement('button');
     toastCloseBtn.classList.add('toast-button');
     toastCloseBtn.innerText = 'X';
 
