@@ -241,10 +241,10 @@ function Cart_UserInformations() {
     const userMail = document.getElementById('email');
 
     // Fonctions permettant de vérifier le format de la saisie de l'utilisateur
-    Cart_RegExp(/^[a-zA-Zà-öÀ-Ö -]{3,60}$/, userFirstName, 'firstNameErrorMsg', 'un prénom');
-    Cart_RegExp(/^[a-zA-Zà-öÀ-Ö '-]{2,100}$/, userLastName, 'lastNameErrorMsg', 'un nom de famille');
-    Cart_RegExp(/^[a-zA-Zà-öÀ-Ö0-9 '-]{0,150}$/, userAddress, 'addressErrorMsg', 'une adresse');
-    Cart_RegExp(/^[a-zA-Zà-öÀ-Ö '-]{2,100}$/, userCity, 'cityErrorMsg', 'un nom de ville');
+    Cart_RegExp(/^[a-zA-Zà-öÀ-Ö -]{3,60}$/, userFirstName, 'firstNameErrorMsg', 'un prénom', '(3-60 caractères)');
+    Cart_RegExp(/^[a-zA-Zà-öÀ-Ö '-]{2,100}$/, userLastName, 'lastNameErrorMsg', 'un nom de famille', '(2-100 caractères)');
+    Cart_RegExp(/^[a-zA-Zà-öÀ-Ö0-9 '-]{5,150}$/, userAddress, 'addressErrorMsg', 'une adresse', '(5-150 caractères)');
+    Cart_RegExp(/^[a-zA-Zà-öÀ-Ö '-]{2,100}$/, userCity, 'cityErrorMsg', 'un nom de ville', '(2-100 caractères)');
     Cart_RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/, userMail, 'emailErrorMsg', 'une adresse e-mail');
 
 
@@ -277,10 +277,10 @@ function Cart_UserInformations() {
 }
 
 // Fonction permettant de vérifier le format de la saisie dans un champ donné
-function Cart_RegExp(regexp, element, divMsg, field) {
+function Cart_RegExp(regexp, element, divMsg, field, condition) {
     element.addEventListener('keyup', function(args)  {
         if (regexp.test(args.target.value) == false) {
-            document.getElementById(divMsg).innerText = `Veuillez saisir ${field} valide.`;
+            document.getElementById(divMsg).innerText = `Veuillez saisir ${field} valide. ${condition}`;
         } else {
             document.getElementById(divMsg).innerText = '';
         };
