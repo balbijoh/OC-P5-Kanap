@@ -13,6 +13,10 @@ fetch('http://localhost:3000/api/products/')
     // Fonction permettant d'afficher les produits du panier via le localStorage
     Cart_DatasForDOM(apiResult);
     Cart_UserInformations();
+
+    // Bouton de commande désactivé à l'initialisation de la page
+    document.getElementById('order').disabled = true;
+    document.getElementById('order').classList.add('order--invalid');
 }).catch(function(error) {
     console.log('Error (fetch request GET): ' + error);
 })
@@ -197,7 +201,6 @@ function Cart_DisplayTotalInDOM() {
 // Fonction permettant de gérer le localStorage
 function Cart_RefreshLocalStorage(kanap, kanapQuantity) {
     let myStorage = [];
-    let kanapId = kanap.id;
 
     // On stocke le contenu du localStorage dans myStorage
     let previousChoices = JSON.parse(localStorage.getItem("kanap"));
@@ -241,6 +244,7 @@ function Cart_UserInformations() {
     Cart_RegExp(/^[a-zA-Zà-öÀ-Ö '-]{2,100}$/, userCity, 'cityErrorMsg', 'un nom de ville');
     Cart_RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/, userMail, 'emailErrorMsg', 'une adresse e-mail');
 
+
     // Au clic du bouton "Commander", on exécute la requête POST
     document.getElementById('order').addEventListener('click', function(event) {
         event.preventDefault();
@@ -275,14 +279,28 @@ function Cart_RegExp(regexp, element, divMsg, field) {
     element.addEventListener('keyup', function(args)  {
         if (regexp.test(args.target.value) == false) {
             document.getElementById(divMsg).innerText = `Veuillez saisir ${field} valide.`;
-            document.getElementById('order').disabled = true;
-            document.getElementById('order').classList.add('order--invalid');
         } else {
             document.getElementById(divMsg).innerText = '';
+        };
+
+        Cart_EnableOrderBtn();
+    });
+}
+
+
+// Fonction permettant d'activer le bouton de commande si les champs sont valides
+function Cart_EnableOrderBtn() {
+    if (document.getElementById('firstName').value != '' && document.getElementById('firstNameErrorMsg').textContent == '' &&
+        document.getElementById('lastName').value != '' && document.getElementById('lastNameErrorMsg').textContent == '' &&
+        document.getElementById('address').value != '' && document.getElementById('addressErrorMsg').textContent == '' &&
+        document.getElementById('city').value != '' && document.getElementById('cityErrorMsg').textContent == '' &&
+        document.getElementById('email').value != '' && document.getElementById('emailErrorMsg').textContent == '') {
             document.getElementById('order').disabled = false;
             document.getElementById('order').classList.remove('order--invalid');
-        };
-    });
+    } else {
+        document.getElementById('order').disabled = true;
+        document.getElementById('order').classList.add('order--invalid');
+    }
 }
 
 
@@ -305,5 +323,3 @@ function Cart_FetchRequestPOST(paramsRequest) {
         console.log('Error (fetch request POST): ' + error);
     })
 }
-
-// TODO Gestion des cas d'erreur : quantité à 0
