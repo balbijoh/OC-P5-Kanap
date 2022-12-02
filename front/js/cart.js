@@ -34,10 +34,10 @@ function Cart_DatasForDOM(apiResult) {
         let apiIndex = apiResult.map(data => data._id).indexOf(kanap.id);
 
         Cart_DisplayProductsInDOM(kanap, apiResult, apiIndex);
-    });
 
-    // Affichage de la quantité totale et du prix total du panier
-    Cart_DisplayTotalInDOM();
+        // Affichage de la quantité totale et du prix total du panier
+        Cart_DisplayTotalInDOM(apiResult);
+    });    
 }
 
 // Fonction permettant de créer les éléments du DOM pour chaque ligne produit
@@ -145,7 +145,7 @@ function Cart_RefreshPrice(kanap, apiResult, apiIndex, inputQuantity, p2Descript
         Cart_RefreshLocalStorage(kanap, kanapQuantity);
 
         // Actualisation de la quantité totale et du prix total
-        Cart_DisplayTotalInDOM();        
+        Cart_DisplayTotalInDOM(apiResult);        
     })
 }
 
@@ -163,18 +163,21 @@ function Cart_DeleteProduct(kanap, apiResult, apiIndex, pDelete, article) {
         Cart_RefreshLocalStorage(kanap, kanapQuantity);
 
         // Actualisation de la quantité totale et du prix total
-        Cart_DisplayTotalInDOM();
+        Cart_DisplayTotalInDOM(apiResult);
     })
 }
 
 // Fonction permettant d'afficher le prix total et la quantité totale du panier
-function Cart_DisplayTotalInDOM() {
+function Cart_DisplayTotalInDOM(apiResult) {
+    if (localStorage.length === 0) {
+        return;
+    }
+
     // <span id="totalQuantity"><!-- 2 --></span>
     const spanTotalQuantity = document.getElementById('totalQuantity');
     let totalQuantity = 0;
     document.querySelectorAll('.itemQuantity').forEach(input => {
-        let articleQuantity = input.value;
-        totalQuantity += parseInt(articleQuantity);
+        totalQuantity += parseInt(input.value);
     })
     spanTotalQuantity.innerText = totalQuantity;
     // --------------------------------------------------
@@ -182,19 +185,15 @@ function Cart_DisplayTotalInDOM() {
     // <span id="totalPrice"><!-- 84,00 --></span>
     const spanTotalPrice = document.getElementById('totalPrice');
     let totalPrice = 0;
-    document.querySelectorAll('article').forEach(article => {
-        let articlePrice = article.querySelector('.cart__item__content__description p ~ p').innerHTML;
-        totalPrice += parseFloat(articlePrice);
+    let myStorage = JSON.parse(localStorage.getItem("kanap"));
+
+    myStorage.forEach(kanap => {
+        let apiIndex = apiResult.map(a => a._id).indexOf(kanap.id);
+        totalPrice += apiResult[apiIndex].price * parseFloat(kanap.quantity);
     })
+    
     spanTotalPrice.innerText = totalPrice;
     // --------------------------------------------------
-
-    setTimeout(function() {
-        if (localStorage.length == 0) {
-            window.alert("Votre panier est vide. Vous allez être redirigé(e) vers la page d'accueil.");
-            location.href = "./index.html";
-        }
-    }, 500);
 }
 
 // Fonction permettant de gérer le localStorage
@@ -220,11 +219,18 @@ function Cart_RefreshLocalStorage(kanap, kanapQuantity) {
     }
 
     // Si myStorage est vide, on clear le localStorage ; sinon on stocke myStorage dans le localStorage
-    if (myStorage.length == 0) {
+    if (myStorage.length === 0) {
         localStorage.clear();
     } else {
         localStorage.setItem("kanap", JSON.stringify(myStorage));
     }
+
+    if (localStorage.length === 0) {
+        setTimeout(function() {
+            window.alert("Votre panier est vide. Vous allez être redirigé(e) vers la page d'accueil.");
+            location.href = "./index.html";
+        }, 500);
+    };
 }
 
 
@@ -240,13 +246,12 @@ function Cart_UserInformations() {
     const userCity = document.getElementById('city');
     const userMail = document.getElementById('email');
 
-    // Fonctions permettant de vérifier le format de la saisie de l'utilisateur
-    Cart_RegExp(/^[a-zA-Zà-öÀ-Ö -]{3,60}$/, userFirstName, 'firstNameErrorMsg', 'un prénom', '(3-60 caractères)');
-    Cart_RegExp(/^[a-zA-Zà-öÀ-Ö '-]{2,100}$/, userLastName, 'lastNameErrorMsg', 'un nom de famille', '(2-100 caractères)');
+    // Fonctions permettant de vérifier le format de la saisie de l'utilisateur    
+    Cart_RegExp(/^([A-Za-zà-öÀ-Ö-]{3,}|[\s]{1}[A-Za-zà-öÀ-Ö-]{1,})*$/, userFirstName, 'firstNameErrorMsg', 'un prénom', '(3-60 caractères)');
+    Cart_RegExp(/^([A-Za-zà-öÀ-Ö-']{2,}|[\s]{1}[A-Za-zà-öÀ-Ö-']{1,})*$/, userLastName, 'lastNameErrorMsg', 'un nom de famille', '(2-100 caractères)');
     Cart_RegExp(/^[a-zA-Zà-öÀ-Ö0-9 '-]{5,150}$/, userAddress, 'addressErrorMsg', 'une adresse', '(5-150 caractères)');
-    Cart_RegExp(/^[a-zA-Zà-öÀ-Ö '-]{2,100}$/, userCity, 'cityErrorMsg', 'un nom de ville', '(2-100 caractères)');
-    Cart_RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/, userMail, 'emailErrorMsg', 'une adresse e-mail');
-
+    Cart_RegExp(/^([A-Za-zà-öÀ-Ö-']{2,}|[\s]{1}[A-Za-zà-öÀ-Ö-']{1,})*$/, userCity, 'cityErrorMsg', 'un nom de ville', '(2-100 caractères)');
+    Cart_RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/, userMail, 'emailErrorMsg', 'une adresse e-mail', '');
 
     // Au clic du bouton "Commander", on exécute la requête POST
     document.getElementById('order').addEventListener('click', function(event) {
@@ -291,11 +296,11 @@ function Cart_RegExp(regexp, element, divMsg, field, condition) {
 
 // Fonction permettant d'activer le bouton de commande si les champs sont valides
 function Cart_EnableOrderBtn() {
-    if (document.getElementById('firstName').value != '' && document.getElementById('firstNameErrorMsg').textContent == '' &&
-        document.getElementById('lastName').value != '' && document.getElementById('lastNameErrorMsg').textContent == '' &&
-        document.getElementById('address').value != '' && document.getElementById('addressErrorMsg').textContent == '' &&
-        document.getElementById('city').value != '' && document.getElementById('cityErrorMsg').textContent == '' &&
-        document.getElementById('email').value != '' && document.getElementById('emailErrorMsg').textContent == '') {
+    if (document.getElementById('firstName').value !== '' && document.getElementById('firstNameErrorMsg').textContent === '' &&
+        document.getElementById('lastName').value !== '' && document.getElementById('lastNameErrorMsg').textContent === '' &&
+        document.getElementById('address').value !== '' && document.getElementById('addressErrorMsg').textContent === '' &&
+        document.getElementById('city').value !== '' && document.getElementById('cityErrorMsg').textContent === '' &&
+        document.getElementById('email').value !== '' && document.getElementById('emailErrorMsg').textContent === '') {
             document.getElementById('order').disabled = false;
             document.getElementById('order').classList.remove('order--invalid');
     } else {
