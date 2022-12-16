@@ -29,7 +29,6 @@ fetch('http://localhost:3000/api/products/' + kanapId)
     // On stock les choix utilisateur dans le localStorage ("onclick")
     document.getElementById('addToCart').addEventListener('click', function(event) {
         Product_SubmitChoice();
-        Product_ToastAddToCart();
     })
 })
 .catch(function(error) {
@@ -126,19 +125,33 @@ function Product_SubmitChoice() {
         previousChoices.forEach(element => {
             myStorage.push(element);
         })
+    }
 
-        // On cherche si l'id existe déjà dans le storage
-        let kanapIndex = myStorage.map(a => a.id).indexOf(newKanap.id);
 
-        // Si l'id existe et que la couleur est la même, on incrémente la liste de la valeur souhaitée
-        if (myStorage[kanapIndex] && myStorage[kanapIndex].color == newKanap.color) {
-            myStorage[kanapIndex].quantity = Number(myStorage[kanapIndex].quantity) + Number(newKanap.quantity);
-        } else {
-            // Si l'id n'existe pas et/ou que la couleur n'est pas la même, on ajoute une nouvelle ligne dans le storage
-            myStorage.push(newKanap);
+    let kanapIndex;
+    let sameKanap = false;
+    // S'il existe déjà un kanap similaire dans myStorage, on incrémente la quantité de la ligne existante
+    myStorage.forEach(element => {
+        if (element.id === newKanap.id && element.color === newKanap.color) {
+            sameKanap = true;
+            kanapIndex = myStorage.map(a => a.id).indexOf(element.id);
+
+            let elementQuantity = myStorage[kanapIndex].quantity + newKanap.quantity;
+
+            // Si la quantité de la ligne produit est supérieure à 100, on n'ajoute pas le produit au panier
+            if (elementQuantity > 100) {
+                return;
+            } else {
+                myStorage[kanapIndex].quantity = Number(myStorage[kanapIndex].quantity) + Number(newKanap.quantity);
+                Product_ToastAddToCart();
+            }
         }
-    } else {
+    })
+
+    // S'il n'y a pas de kanap similaire dans myStorage, on ajoute le produit au panier
+    if (sameKanap === false) {
         myStorage.push(newKanap);
+        Product_ToastAddToCart();
     }
 
     // On stocke le tableau myStorage dans le localStorage
@@ -160,7 +173,7 @@ function Product_ToastAddToCart() {
     toastDiv.append(toastText, toastCloseBtn);
     document.querySelector('.limitedWidthBlock').appendChild(toastDiv);
 
-    toastDiv.addEventListener('click', function(event) {
+    toastCloseBtn.addEventListener('click', function(event) {
         document.querySelector('.limitedWidthBlock').removeChild(toastDiv);
     })
 }
