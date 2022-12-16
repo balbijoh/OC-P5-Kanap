@@ -277,7 +277,10 @@ function Cart_UserInformations() {
             products: productsId
         }
 
-        Cart_FetchRequestPOST(paramsRequest);
+        let resultControl = Cart_EnableOrderBtn();
+        if (resultControl === true) {
+            Cart_FetchRequestPOST(paramsRequest);
+        }
     })
 }
 
@@ -303,9 +306,11 @@ function Cart_EnableOrderBtn() {
         document.getElementById('email').value !== '' && document.getElementById('emailErrorMsg').textContent === '') {
             document.getElementById('order').disabled = false;
             document.getElementById('order').classList.remove('order--invalid');
+            return true;
     } else {
         document.getElementById('order').disabled = true;
         document.getElementById('order').classList.add('order--invalid');
+        return false;
     }
 }
 

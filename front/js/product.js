@@ -118,6 +118,15 @@ function Product_SubmitChoice() {
         quantity: Number(document.getElementById('quantity').value)
     };
 
+
+    const quantityField = document.getElementById('quantity');
+    const colorField = document.getElementById('colors');
+
+    if (quantityField.value <= 0 || quantityField.value > 100 || quantityField.value == null || 
+        colorField.value == '' || colorField.value == null) {
+        return;
+    }
+
     // Si le localStorage n'est pas vide
     if(localStorage.length != 0) {
         // On stocke le contenu du localStorage dans myStorage
